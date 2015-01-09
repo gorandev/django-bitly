@@ -8,11 +8,10 @@ except ImportError:
     from datetime import datetime
 
 from django.db import models
-from django.contrib.sites.models import Site
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
 from django.conf import settings
-from django.utils import simplejson as json
+import json
 
 from .conf import BITLY_TIMEOUT
 from .exceptions import BittleException
@@ -70,8 +69,6 @@ class BittleManager(models.Manager):
             raise BittleException("Object '%s' does not have a 'get_absolute_url' method."
                 % obj.__unicode__())
 
-        current_domain = Site.objects.get_current().domain
-
         obj_url = obj.get_absolute_url()
         if re.match(r'^(aim|apt|bitcoin|callto|cid|data|dav|fax|feed|geo|go|h323|iax|im|magnet|mailto|message|mid|msnim|mvn|news|palm|paparazzi|pres|proxy|query|session|sip|sips|skype|sms|spotify|steam|tag|tel|things|urn|uuid|view-source|ws|wyciwyg|xmpp|ymsgr):', obj_url, re.IGNORECASE):
             # These are the URI Schemes that can be legitimately used with no slashes:
@@ -97,7 +94,7 @@ class BittleManager(models.Manager):
             url = "%s:%s" % (scheme, obj_url)
         else:
             # Normal, relative ("absolute" in Django-speak) URLs
-            url = "%s://%s%s" % (scheme, current_domain, obj_url)
+            url = "%s://%s" % (scheme, obj_url)
 
         try:
             bittle = Bittle.objects.get_for_instance(obj)
